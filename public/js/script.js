@@ -106,6 +106,9 @@ window.addEventListener('load', () => {
 
 // Eventos
 window.addEventListener('keydown', e => {
+    // Evitar que se sigan enviando datos si ya perdió el jugador
+    if(fin) return;
+
     if(e.code == "KeyA" || e.code == "ArrowLeft"){
         socket.emit("mover", ["iz", true]);
     }
@@ -124,6 +127,9 @@ window.addEventListener('keydown', e => {
 })
 
 window.addEventListener('keyup', e => {
+    // Evitar que se sigan enviando datos si ya perdió el jugador
+    if(fin) return;
+
     if(e.code == "KeyA" || e.code == "ArrowLeft"){
         socket.emit("mover", ["iz", false]);
     }
