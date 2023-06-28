@@ -6,6 +6,8 @@ const socket = io();
 let iniciado = false; // Evita que salga el letrero de fin de juego
 let fin = false;
 
+let nombre = prompt("Escribe tu nombre:");
+
 let jugadores = {};
 let balas = [];
 
@@ -74,7 +76,7 @@ function reiniciar(){
     // Aquí no se inicia el juego porque es hasta que se cree el jugador
 
     // Pedir un nuevo jugador (nueva posición, y datos)
-    socket.emit("entrar", prompt("Escribe tu nombre:"));
+    socket.emit("entrar", nombre);
 
     loop();
 }
@@ -97,7 +99,7 @@ function loop(){
 
 window.addEventListener('load', () => {
     // Pedir un nuevo jugador
-    socket.emit("entrar", prompt("Escribe tu nombre:"));
+    socket.emit("entrar", nombre);
     
     loop();
 })
