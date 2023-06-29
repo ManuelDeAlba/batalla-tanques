@@ -1,12 +1,13 @@
-const { anguloARadianes } = require("../utils");
+const { degToRad } = require("../utils");
 const Bala = require("./Bala");
 
 class Jugador{
-    constructor(id, nombre){
+    constructor(id, nombre, mapa){
         this.id = id;
         this.nombre = nombre;
-        this.x = Math.random() * 500;
-        this.y = Math.random() * 500;
+
+        this.x = mapa.x + Math.random() * mapa.w;
+        this.y = mapa.y + Math.random() * mapa.h;
         this.r = 20;
         this.color = `hsl(${Math.floor(Math.random()*361)}, 100%, 50%)`;
         this.vel = 5;
@@ -22,7 +23,7 @@ class Jugador{
             at: false
         }
     }
-    actualizarTeclas([direccion, estado]){
+    actualizarTecla([direccion, estado]){
         this.teclas[direccion] = estado;
     }
     mover(){
@@ -30,27 +31,29 @@ class Jugador{
         if(this.teclas.iz) this.angulo -= this.velAngulo;
         if(this.teclas.de) this.angulo += this.velAngulo;
         
-        // Suponemos que siempre camina hacia adelante
+        // Movimiento hacia adelante o atrás
         if(this.teclas.ad){
-            this.x += Math.cos(anguloARadianes(this.angulo)) * this.vel;
-            this.y += Math.sin(anguloARadianes(this.angulo)) * this.vel;
+            this.x += Math.cos(degToRad(this.angulo)) * this.vel;
+            this.y += Math.sin(degToRad(this.angulo)) * this.vel;
         }
         if(this.teclas.at){
-            this.x -= Math.cos(anguloARadianes(this.angulo)) * this.vel;
-            this.y -= Math.sin(anguloARadianes(this.angulo)) * this.vel;
+            this.x -= Math.cos(degToRad(this.angulo)) * this.vel;
+            this.y -= Math.sin(degToRad(this.angulo)) * this.vel;
         }
     }
     disparar(balas){
-        // Crea balas
+        // Crea una bala solo si acaba de presionar el boton (evita que salgan muchas si deja apretada la tecla)
         if(!this.teclas.espacio){
+            // Se bloquea el disparo hasta que se suelte la tecla
             this.teclas.espacio = true;
 
+            // Crea la bala en la posición del jugador
             balas.push(new Bala({
-                x: this.x + Math.cos(anguloARadianes(this.angulo)) * this.r,
-                y: this.y + Math.sin(anguloARadianes(this.angulo)) * this.r,
-                angulo: anguloARadianes(this.angulo),
-                color: this.color,
-                id_jugador: this.id
+                id_jugador: this.id, // Para no contar la colisión con el que disparó
+                x: this.x + Math.cos(degToRad(this.angulo)) * this.r * 1.5,
+                y: this.y + Math.sin(degToRad(this.angulo)) * this.r * 1.5,
+                angulo: degToRad(this.angulo),
+                color: this.color
             }));
         }
     }

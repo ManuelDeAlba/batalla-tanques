@@ -1,35 +1,39 @@
 class Bala{
-    constructor({x, y, angulo, color, id_jugador}){
+    constructor({id_jugador, x, y, angulo, color}){
         this.id_jugador = id_jugador;
         this.x = x;
         this.y = y;
         this.r = 10;
         this.color = color; 
         this.angulo = angulo;
-        this.vel = 5;
+        this.vel = 6;
         this.dano = 1;
 
         this.estado = 1;
     }
-    mover(jugadores){
+    mover(jugadores, mapa){
+        // Se mueve la bala
         this.x += Math.cos(this.angulo) * this.vel;
         this.y += Math.sin(this.angulo) * this.vel;
 
-        if(this.x + this.r < 0 || this.x - this.r > 500 || this.y + this.r < 0 || this.y - this.r > 500){
-            this.estado = 0;
-        }
+        // Si la bala está fuera del mapa, se borra
+        if(mapa.estaFuera(this)) this.estado = 0;
 
         // Colisión con jugadores
         for(let i in jugadores){
-            if(i != this.id_jugador){
-                let jugador = jugadores[i];
-                let distancia = Math.sqrt((jugador.x - this.x)**2 + (jugador.y - this.y)**2);
-                if(distancia < jugador.r + this.r){
-                    this.estado = 0;
-                    
-                    jugador.vida -= this.dano;
-                    if(jugador.vida < 0) jugador.vida = 0;
-                }
+            // Si el jugador es el creador, no cuenta la colisión
+            if(i == this.id_jugador) continue;
+            
+            let jugador = jugadores[i];
+            let distancia = Math.sqrt((jugador.x - this.x) ** 2 + (jugador.y - this.y) ** 2);
+
+            if(distancia < jugador.r + this.r){
+                // Desaparece la bala
+                this.estado = 0;
+                
+                // Al jugador se le baja la vida por el disparo
+                jugador.vida -= this.dano;
+                if(jugador.vida < 0) jugador.vida = 0;
             }
         }
     }
