@@ -67,9 +67,13 @@ function moverJugador(socket, movimiento){
 }
 
 function disparar(socket, disparo){
+    // Si no existe el jugador, no hace nada (esto evita que se manden disparos exactamente en el momento que muere)
+    if(!juego.jugadores[socket.id]) return;
+
     // Si se presiona la tecla de disparo, intenta disparar pero primero comprueba si ya se soltó anteriormente
     // Para evitar que se deje presionada la tecla y registre muchos disparos
     // Si se suelta, se pone en false para poder volver a disparar
+
     if(disparo) juego.jugadores[socket.id].disparar(juego.balas);
     else juego.jugadores[socket.id].actualizarTecla(["espacio", false]);
 }
