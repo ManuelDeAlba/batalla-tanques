@@ -103,19 +103,35 @@ function dibujarMapa(){
     ctx.strokeStyle = mapa.colorLineas;
     ctx.lineWidth = 2;
 
+    let distanciaCoordenadas = 100;
+
     // Verticales
-    for(let i = mapa.x + mapa.w/10; i < mapa.x + mapa.w; i += mapa.w / 10){
+    for(let i = mapa.x + distanciaCoordenadas; i < mapa.x + mapa.w; i += distanciaCoordenadas){
         ctx.beginPath();
         ctx.moveTo(i - camara.x, mapa.y - camara.y);
         ctx.lineTo(i - camara.x, mapa.y + mapa.h - camara.y);
         ctx.stroke();
     }
     // Horizontales
-    for(let i = mapa.y + mapa.h/10; i < mapa.y + mapa.h; i += mapa.h / 10){
+    for(let i = mapa.y + distanciaCoordenadas; i < mapa.y + mapa.h; i += distanciaCoordenadas){
         ctx.beginPath();
         ctx.moveTo(mapa.x - camara.x, i - camara.y);
         ctx.lineTo(mapa.x + mapa.w - camara.x, i - camara.y);
         ctx.stroke();
+    }
+    ctx.restore();
+
+    // Dibujar coordenadas
+    ctx.save();
+    ctx.fillStyle = "#fff";
+    // Coordenadas eje x
+    for(let x = mapa.x; x <= mapa.x + mapa.w; x += distanciaCoordenadas){
+        ctx.fillText(x, x - camara.x, 10);
+    }
+    // Coordenadas eje y
+    ctx.textAlign = "left";
+    for(let y = mapa.y; y <= mapa.y + mapa.h; y += distanciaCoordenadas){
+        ctx.fillText(y, 0, y - camara.y);
     }
     ctx.restore();
 }

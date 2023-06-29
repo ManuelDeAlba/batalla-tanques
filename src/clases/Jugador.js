@@ -26,7 +26,7 @@ class Jugador{
     actualizarTecla([direccion, estado]){
         this.teclas[direccion] = estado;
     }
-    mover(){
+    mover(mapa){
         // Giros
         if(this.teclas.iz) this.angulo -= this.velAngulo;
         if(this.teclas.de) this.angulo += this.velAngulo;
@@ -40,6 +40,12 @@ class Jugador{
             this.x -= Math.cos(degToRad(this.angulo)) * this.vel;
             this.y -= Math.sin(degToRad(this.angulo)) * this.vel;
         }
+
+        // Evitar que se salga por los bordes del mapa
+        if(this.x - this.r < mapa.x) this.x = mapa.x + this.r;
+        if(this.x + this.r > mapa.x + mapa.w) this.x = mapa.x + mapa.w - this.r;
+        if(this.y - this.r < mapa.y) this.y = mapa.y + this.r;
+        if(this.y + this.r > mapa.y + mapa.h) this.y = mapa.y + mapa.h - this.r;
     }
     disparar(balas){
         // Crea una bala solo si acaba de presionar el boton (evita que salgan muchas si deja apretada la tecla)

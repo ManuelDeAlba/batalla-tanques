@@ -26,7 +26,7 @@ let juego = {
 // Mueve a los jugadores y borra a los muertos
 function actualizarJugadores(){
     for(let i in juego.jugadores){
-        juego.jugadores[i].mover();
+        juego.jugadores[i].mover(juego.mapa);
 
         // Si un jugador está muerto se borra
         if(juego.jugadores[i].vida <= 0){
