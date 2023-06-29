@@ -63,6 +63,9 @@ function borrarJugador(socket){
 }
 
 function moverJugador(socket, movimiento){
+    // Si no existe el jugador, no se mueve (esto evita que se mueva exactamente en el momento que muere)
+    if(!juego.jugadores[socket.id]) return;
+
     juego.jugadores[socket.id].actualizarTecla(movimiento);
 }
 
