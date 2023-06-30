@@ -7,6 +7,7 @@ let iniciado = false; // Evita que salga el letrero de fin de juego al cargar la
 let fin = false;
 
 let nombre;
+let puntaje = 0;
 
 let jugador;
 let jugadores = [];
@@ -78,8 +79,9 @@ function estadoJuego(){
         ctx.textBaseline = "middle";
         ctx.font = "30px Arial";
         ctx.fillStyle = "white";
-        ctx.fillText("¡Perdiste!", canvas.width / 2, canvas.height / 2);
-        ctx.fillText("Click para reiniciar", canvas.width / 2, canvas.height / 2 + 30);
+        ctx.fillText("¡Perdiste!", canvas.width / 2, canvas.height / 2 - 35);
+        ctx.fillText(`Enemigos eliminados: ${puntaje}`, canvas.width / 2, canvas.height / 2);
+        ctx.fillText("Click para reiniciar", canvas.width / 2, canvas.height / 2 + 35);
     }
 }
 
@@ -137,6 +139,9 @@ function dibujarMapa(){
 }
 
 function dibujarPuntajes(){
+    // Se actualiza el puntaje del jugador por si deja de existir, guardarlo y tener forma de mostrarlo
+    if(jugador) puntaje = jugador.enemigosEliminados;
+
     ctx.save();
     // Lista de puntajes
     ctx.fillStyle = "rgba(0, 0, 0, .3)";
@@ -145,7 +150,8 @@ function dibujarPuntajes(){
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
     ctx.font = "15px Arial";
-    if(jugador) ctx.fillText(`${jugador.nombre.substr(0, 7)}: ${jugador.enemigosEliminados}`, 50, 35);
+
+    ctx.fillText(`${nombre.substr(0, 7)}: ${jugador?.enemigosEliminados || puntaje}`, 50, 35);
 
     // Nombres de los enemigos
     let enemigos = [...jugadores, ...bots];

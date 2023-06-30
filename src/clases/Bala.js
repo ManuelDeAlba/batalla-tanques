@@ -37,7 +37,7 @@ class Bala{
                 if(jugador.vida <= 0){
                     jugador.vida = 0;
 
-                    // Le suma un enemigo derrotado al dueño de la bala
+                    // Le suma un enemigo eliminado al dueño de la bala
                     let creador = jugadores.find(jugador => jugador.id == this.id_jugador);
                     if(creador) creador.enemigosEliminados++;
                 }
