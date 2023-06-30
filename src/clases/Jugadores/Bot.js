@@ -1,22 +1,19 @@
 const { v1: uuidv1 } = require("uuid");
 
-const { degToRad, radToDeg, enteroAleatorio } = require("../utils");
+const { degToRad, radToDeg, enteroAleatorio } = require("../../utils");
+const Tanque = require("./Tanque");
 const Bala = require("./Bala");
 
-class Bot{
+class Bot extends Tanque{
     constructor(mapa){
+        super(mapa);
         this.id = uuidv1();
         this.nombre = "Bot";
         
-        this.r = 20;
-        this.x = enteroAleatorio(mapa.x + this.r, mapa.x + mapa.w - this.r);
-        this.y = enteroAleatorio(mapa.y + this.r, mapa.y + mapa.h - this.r);
         this.color = "red";
-        this.vel = 5;
-        this.angulo = 0;
-        this.velAngulo = 5;
-        this.atacando = false;
 
+        // Propiedades que solo tienen los bots
+        this.atacando = false;
         this.i = 0;
         this.avanzar = 0;
         this.tiempoAvanzar = enteroAleatorio(30, 60);
@@ -28,11 +25,6 @@ class Bot{
         this.distanciaMaxima = 200;
         this.direccionApuntado = enteroAleatorio(0, 1) == 1 ? 1 : -1;
         this.autoApuntado = false;
-
-        this.vida = 10;
-        this.dano = 1;
-        this.danoOriginal = this.dano; // Para regresar su daño después de un poder
-        this.enemigosEliminados = 0;
     }
     mover(mapa){
         // Contador para las acciones del bot

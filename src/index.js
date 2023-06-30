@@ -11,11 +11,11 @@ const servidor = app.listen(app.get("PORT"), () => {
 })
 
 //? Lógica del juego
-const Jugador = require("./clases/Jugador");
+const Jugador = require("./clases/Jugadores/Jugador");
 const io = socketIO(servidor);
 
 const Mapa = require("./clases/Mapa");
-const Bot = require("./clases/Bot");
+const Bot = require("./clases/Jugadores/Bot");
 const PoderMasVida = require("./clases/Poderes/PoderMasVida");
 const PoderMasDano = require("./clases/Poderes/PoderMasDano");
 

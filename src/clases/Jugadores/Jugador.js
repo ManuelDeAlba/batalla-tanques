@@ -1,23 +1,14 @@
-const { degToRad, enteroAleatorio } = require("../utils");
+const { degToRad, enteroAleatorio } = require("../../utils");
+const Tanque = require("./Tanque");
 const Bala = require("./Bala");
 
-class Jugador{
+class Jugador extends Tanque{
     constructor(id, nombre, mapa){
+        super(mapa);
         this.id = id;
         this.nombre = nombre;
 
-        this.r = 20;
-        this.x = enteroAleatorio(mapa.x + this.r, mapa.x + mapa.w - this.r);
-        this.y = enteroAleatorio(mapa.y + this.r, mapa.y + mapa.h - this.r);
         this.color = `hsl(${enteroAleatorio(0, 360)}, 100%, 50%)`;
-        this.vel = 5;
-        this.angulo = 0;
-        this.velAngulo = 5;
-
-        this.vida = 10;
-        this.dano = 1;
-        this.danoOriginal = this.dano; // Para regresar su daño después de un poder
-        this.enemigosEliminados = 0;
 
         this.teclas = {
             iz: false,
