@@ -9,21 +9,20 @@ let fin = false;
 let nombre;
 
 let jugador;
-let jugadores = {};
+let jugadores = [];
 let balas = [];
+let bots = [];
 let mapa;
 
 let camara;
 
 function dibujarJugadores(){
     // Se crea la lista de jugadores juntando al actual y a los enemigos
-    let listaJugadores = {...jugadores};
+    let listaJugadores = [...jugadores, ...bots];
     // Si ya se creó el jugador actual, lo agrega
-    if(jugador) listaJugadores[socket.id] = jugador;
+    if(jugador) listaJugadores.push(jugador);
 
-    for(let i in listaJugadores){
-        let {x, y, r, color, angulo, vida, nombre} = listaJugadores[i];
-        
+    listaJugadores.forEach(({x, y, r, color, angulo, vida, nombre}) => {
         // Circulo
         ctx.save();
         ctx.beginPath();
@@ -47,8 +46,8 @@ function dibujarJugadores(){
         ctx.fillText(vida, x - camara.x, y - camara.y - r*2 - 10);
 
         // Nombre
-        ctx.fillText(nombre, x - camara.x, y - camara.y - r*2 + 10);
-    }
+        ctx.fillText(nombre || "Anónimo", x - camara.x, y - camara.y - r*2 + 10);
+    })
 }
 
 function dibujarBalas(){
@@ -123,6 +122,7 @@ function dibujarMapa(){
 
     // Dibujar coordenadas
     ctx.save();
+    ctx.font = "15px Arial";
     ctx.fillStyle = "#fff";
     // Coordenadas eje x
     for(let x = mapa.x; x <= mapa.x + mapa.w; x += distanciaCoordenadas){
@@ -132,6 +132,28 @@ function dibujarMapa(){
     ctx.textAlign = "left";
     for(let y = mapa.y; y <= mapa.y + mapa.h; y += distanciaCoordenadas){
         ctx.fillText(y, 0, y - camara.y);
+    }
+    ctx.restore();
+}
+
+function dibujarPuntajes(){
+    ctx.save();
+    // Lista de puntajes
+    ctx.fillStyle = "rgba(0, 0, 0, .3)";
+    ctx.fillRect(40, 20, 100, 165);
+
+    ctx.fillStyle = "white";
+    ctx.textAlign = "left";
+    ctx.font = "15px Arial";
+    if(jugador) ctx.fillText(`${jugador.nombre.substr(0, 7)}: ${jugador.enemigosEliminados}`, 50, 35);
+
+    // Nombres de los enemigos
+    let enemigos = [...jugadores, ...bots];
+    enemigos = enemigos.toSorted((a, b) => b.enemigosEliminados - a.enemigosEliminados)
+    
+    for(let i = 0; i < 9; i++){
+        let enemigo = enemigos[i];
+        if(enemigo) ctx.fillText(`${enemigo.nombre}: ${enemigo.enemigosEliminados}`, 50, 35 + 15 * (i+1));
     }
     ctx.restore();
 }
@@ -157,6 +179,9 @@ function loop(){
         // Dibujar a todos los objetos
         dibujarBalas();
         dibujarJugadores();
+
+        // Dibuja el puntaje del jugador
+        dibujarPuntajes();
     
         // Revisa el estado del juego
         estadoJuego();
@@ -230,14 +255,15 @@ function obtenerDatos(juego){
 
     // Separar jugadores (actual y los enemigos)
     jugador = undefined;
-    jugadores = {}
+    jugadores = [];
 
-    for(let i in juego.jugadores){
-        if(i == socket.id) jugador = juego.jugadores[i];
-        else jugadores[i] = juego.jugadores[i];
-    }
+    juego.jugadores.forEach(j => {
+        if(j.id == socket.id) jugador = j;
+        else jugadores.push(j);
+    })
 
     balas = juego.balas;
+    bots = juego.bots;
 }
 
 socket.on("datosJuego", obtenerDatos);

@@ -15,6 +15,7 @@ class Jugador{
         this.velAngulo = 5;
 
         this.vida = 10;
+        this.enemigosEliminados = 0;
 
         this.teclas = {
             iz: false,
