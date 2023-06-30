@@ -11,20 +11,19 @@ class Bala{
 
         this.estado = 1;
     }
-    mover(jugadores, mapa){
+    mover(mapa){
         // Se mueve la bala
         this.x += Math.cos(this.angulo) * this.vel;
         this.y += Math.sin(this.angulo) * this.vel;
 
         // Si la bala está fuera del mapa, se borra
         if(mapa.estaFuera(this)) this.estado = 0;
+    }
+    comprobarColisiones(jugadores){
+        // Colisión con jugadores o bots
+        jugadores.forEach(jugador => {
+            if(jugador.id == this.id_jugador) return;
 
-        // Colisión con jugadores
-        for(let i in jugadores){
-            // Si el jugador es el creador, no cuenta la colisión
-            if(i == this.id_jugador) continue;
-            
-            let jugador = jugadores[i];
             let distancia = Math.sqrt((jugador.x - this.x) ** 2 + (jugador.y - this.y) ** 2);
 
             if(distancia < jugador.r + this.r){
@@ -33,9 +32,17 @@ class Bala{
                 
                 // Al jugador se le baja la vida por el disparo
                 jugador.vida -= this.dano;
-                if(jugador.vida < 0) jugador.vida = 0;
+                
+                // Si ya se murió el jugador
+                if(jugador.vida <= 0){
+                    jugador.vida = 0;
+
+                    // Le suma un enemigo derrotado al dueño de la bala
+                    let creador = jugadores.find(jugador => jugador.id == this.id_jugador);
+                    if(creador) creador.enemigosEliminados++;
+                }
             }
-        }
+        })
     }
 }
 

@@ -15,36 +15,65 @@ const Jugador = require("./clases/Jugador");
 const io = socketIO(servidor);
 
 const Mapa = require("./clases/Mapa");
+const Bot = require("./clases/Bot");
+
+const limiteBots = 10;
 
 // Datos que se envian al frontend
 let juego = {
     mapa: new Mapa(),
-    jugadores: {},
+    jugadores: [],
+    bots: [],
     balas: []
 }
 
 // Mueve a los jugadores y borra a los muertos
 function actualizarJugadores(){
-    for(let i in juego.jugadores){
-        juego.jugadores[i].mover(juego.mapa);
+    // Se le pasa el mapa para saber donde están los límites
+    juego.jugadores.forEach(jugador => jugador.mover(juego.mapa));
 
-        // Si un jugador está muerto se borra
-        if(juego.jugadores[i].vida <= 0){
-            delete juego.jugadores[i];
-        }
-    }
+    // Si un jugador está muerto, se borra
+    juego.jugadores = juego.jugadores.filter(jugador => jugador.vida > 0);
+}
+
+// Mueve a los bots y borra a los muertos
+function actualizarBots(){
+    juego.bots.forEach(bot => {
+        // Se le pasa el mapa para saber donde son los límites
+        bot.mover(juego.mapa);
+        // Se le pasa el arreglo de las balas para agregar cuando dispare y los jugadores para detectar y disparar
+        bot.comprobarDisparos(juego.balas, [...juego.jugadores, ...juego.bots]);
+    });
+
+    // Si un bot está muerto, se bora
+    juego.bots = juego.bots.filter(bot => bot.vida > 0);
 }
 
 // Mueve las balas y las borra
 function actualizarBalas(){
-    juego.balas.forEach(bala => bala.mover(juego.jugadores, juego.mapa));
+    // Mueve la bala y busca si hay colisiones
+    juego.balas.forEach(bala => {
+        bala.mover(juego.mapa)
+        bala.comprobarColisiones([...juego.jugadores, ...juego.bots]);
+    });
+
+    // Detecta las colisiones
     juego.balas = juego.balas.filter(bala => bala.estado);
+}
+
+function crearBot(){
+    // Se le pasa el mapa para elegir un lugar aleatorio para aparecer
+    if(juego.bots.length < limiteBots) juego.bots.push(new Bot(juego.mapa));
 }
 
 function loop(){
     // Mover objetos
     actualizarJugadores();
+    actualizarBots();
     actualizarBalas();
+
+    // Crear bots si hacen falta
+    crearBot();
 
     // Enviar los datos constantemente
     io.emit("datosJuego", juego);
@@ -53,32 +82,35 @@ function loop(){
 // Intervalo del juego
 let intervalo = setInterval(loop, 1000/60);
 
+//? Funciones de eventos de socketio
 function crearJugador(socket, nombre){
-    juego.jugadores[socket.id] = new Jugador(socket.id, nombre, juego.mapa);
+    // Se le pasan los datos para crear y el mapa para aparecer en un lugar aleatorio
+    juego.jugadores.push(new Jugador(socket.id, nombre, juego.mapa));
 }
 
 function borrarJugador(socket){
     console.log('Cliente desconectado:', socket.id);
-    delete juego.jugadores[socket.id];
+    juego.jugadores = juego.jugadores.filter(jugador => jugador.id != socket.id);
 }
 
 function moverJugador(socket, movimiento){
     // Si no existe el jugador, no se mueve (esto evita que se mueva exactamente en el momento que muere)
-    if(!juego.jugadores[socket.id]) return;
+    let jugador = juego.jugadores.find(jugador => jugador.id == socket.id);
+    if(!jugador) return;
 
-    juego.jugadores[socket.id].actualizarTecla(movimiento);
+    jugador.actualizarTecla(movimiento);
 }
 
 function disparar(socket, disparo){
     // Si no existe el jugador, no hace nada (esto evita que se manden disparos exactamente en el momento que muere)
-    if(!juego.jugadores[socket.id]) return;
+    let jugador = juego.jugadores.find(jugador => jugador.id == socket.id);
+    if(!jugador) return;
 
     // Si se presiona la tecla de disparo, intenta disparar pero primero comprueba si ya se soltó anteriormente
     // Para evitar que se deje presionada la tecla y registre muchos disparos
     // Si se suelta, se pone en false para poder volver a disparar
-
-    if(disparo) juego.jugadores[socket.id].disparar(juego.balas);
-    else juego.jugadores[socket.id].actualizarTecla(["espacio", false]);
+    if(disparo) jugador.disparar(juego.balas);
+    else jugador.actualizarTecla(["espacio", false]);
 }
 
 io.on('connection', (socket) => {   
