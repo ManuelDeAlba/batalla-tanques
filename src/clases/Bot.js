@@ -1,16 +1,16 @@
 const { v1: uuidv1 } = require("uuid");
 
-const { degToRad, radToDeg } = require("../utils");
+const { degToRad, radToDeg, enteroAleatorio } = require("../utils");
 const Bala = require("./Bala");
 
 class Bot{
     constructor(mapa){
         this.id = uuidv1();
         this.nombre = "Bot";
-
-        this.x = mapa.x + Math.random() * mapa.w;
-        this.y = mapa.y + Math.random() * mapa.h;
+        
         this.r = 20;
+        this.x = enteroAleatorio(mapa.x + this.r, mapa.x + mapa.w - this.r);
+        this.y = enteroAleatorio(mapa.y + this.r, mapa.y + mapa.h - this.r);
         this.color = "red";
         this.vel = 5;
         this.angulo = 0;
@@ -19,17 +19,19 @@ class Bot{
 
         this.i = 0;
         this.avanzar = 0;
-        this.tiempoAvanzar = 30 + Math.floor(Math.random() * 31);
+        this.tiempoAvanzar = enteroAleatorio(30, 60);
         this.giro = 0;
         this.tiempoGiro = 60;
-        this.tiempoDisparar = 10 + Math.floor(Math.random() * 21);
+        this.tiempoDisparar = enteroAleatorio(10, 30);
 
-        this.masCercano = undefined;
-        this.distanciaMaxima = 150;
-        this.direccionApuntado = Math.random() > 0.5 ? 1 : -1;
+        this.objetivo = undefined;
+        this.distanciaMaxima = 200;
+        this.direccionApuntado = enteroAleatorio(0, 1) == 1 ? 1 : -1;
         this.autoApuntado = false;
 
         this.vida = 10;
+        this.dano = 1;
+        this.danoOriginal = this.dano; // Para regresar su daño después de un poder
         this.enemigosEliminados = 0;
     }
     mover(mapa){
@@ -37,8 +39,8 @@ class Bot{
         this.i++;
 
         // Aleatoriamente se selecciona la dirección de giro y para avanzar
-        if(this.i % this.tiempoAvanzar == 0) this.avanzar = Math.floor(Math.random() * 2);
-        if(this.i % this.tiempoGiro == 0) this.giro = -1 + Math.floor(Math.random() * 3);
+        if(this.i % this.tiempoAvanzar == 0) this.avanzar = enteroAleatorio(0, 1);
+        if(this.i % this.tiempoGiro == 0) this.giro = enteroAleatorio(-1, 1);
 
         // Movimiento hacia adelante o quieto
         // Si está atacando, no se mueve
@@ -50,7 +52,7 @@ class Bot{
         // Giros
         // Si está atacando, ignora el this.giro y voltea hacia el jugador automáticamente
         if(this.atacando){
-            let anguloFinal = radToDeg(Math.atan2(this.y - this.masCercano.y, this.x - this.masCercano.x)) + 180;
+            let anguloFinal = radToDeg(Math.atan2(this.y - this.objetivo.y, this.x - this.objetivo.x)) + 180;
 
             if(this.angulo % 360 != anguloFinal){
                 this.angulo += this.velAngulo * this.direccionApuntado;
@@ -78,7 +80,7 @@ class Bot{
         if(this.y + this.r > mapa.y + mapa.h) this.y = mapa.y + mapa.h - this.r;
     }
     obtenerJugadorMasCercano(jugadores){
-        let distanciaMasCercano = undefined;
+        let distanciaObjetivo = undefined;
 
         // Comprueba la distancia con todos los jugadores y obtiene al más cercano
         jugadores.forEach(jugador => {
@@ -88,13 +90,13 @@ class Bot{
             let distancia = Math.sqrt((this.x - jugador.x) ** 2 + (this.y - jugador.y) ** 2);
 
             // Si la distancia es menor, se guardan sus datos para después calcular el ángulo y girarse
-            if(distancia < distanciaMasCercano || distanciaMasCercano == undefined){
-                distanciaMasCercano = distancia;
+            if(distancia < distanciaObjetivo || distanciaObjetivo == undefined){
+                distanciaObjetivo = distancia;
 
                 // Si acaba de cambiar su target, lo tiene que buscar y no auto apuntar
-                if(this.masCercano?.id != jugador.id) this.autoApuntado = false;
+                if(this.objetivo?.id != jugador.id) this.autoApuntado = false;
 
-                this.masCercano = {
+                this.objetivo = {
                     id: jugador.id,
                     x: jugador.x,
                     y: jugador.y
@@ -102,14 +104,14 @@ class Bot{
             }
         })
 
-        return distanciaMasCercano;
+        return distanciaObjetivo;
     }
     comprobarDisparos(balas, jugadores){
-        // Se obtiene la distancia del jugador más cercano (también guarda su posición en this.masCercano)
-        let distanciaMasCercano = this.obtenerJugadorMasCercano(jugadores);
+        // Se obtiene la distancia del jugador más cercano (también guarda su posición en this.objetivo)
+        let distanciaObjetivo = this.obtenerJugadorMasCercano(jugadores);
 
-        // Si existe alguien cercano y la distancia es menor o igual a la distancia máxima
-        if(this.masCercano && distanciaMasCercano < this.distanciaMaxima){
+        // Si ya tiene un objetivo y la distancia está dentro del rango
+        if(this.objetivo && distanciaObjetivo < this.distanciaMaxima){
             // Se pone al bot en modo ataque (se queda quieto y se mueve para apuntar al jugador)
             this.atacando = true;
 
@@ -120,6 +122,7 @@ class Bot{
                     id_jugador: this.id, // Para no contar la colisión con el que disparó
                     x: this.x + Math.cos(degToRad(this.angulo)) * this.r * 1.5,
                     y: this.y + Math.sin(degToRad(this.angulo)) * this.r * 1.5,
+                    dano: this.dano,
                     angulo: degToRad(this.angulo),
                     color: this.color
                 }));

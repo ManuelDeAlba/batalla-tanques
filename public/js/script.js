@@ -13,77 +13,10 @@ let jugador;
 let jugadores = [];
 let balas = [];
 let bots = [];
+let poderes = [];
 let mapa;
 
 let camara;
-
-function dibujarJugadores(){
-    // Se crea la lista de jugadores juntando al actual y a los enemigos
-    let listaJugadores = [...jugadores, ...bots];
-    // Si ya se creó el jugador actual, lo agrega
-    if(jugador) listaJugadores.push(jugador);
-
-    listaJugadores.forEach(({x, y, r, color, angulo, vida, nombre}) => {
-        // Circulo
-        ctx.save();
-        ctx.beginPath();
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = color;
-        ctx.arc(x - camara.x, y - camara.y, r, 0, 2 * Math.PI);
-        ctx.fill();
-        
-        // Cañon
-        ctx.translate(x - camara.x, y - camara.y);
-        ctx.rotate((angulo + 90) * Math.PI / 180);
-        ctx.fillRect(-10, -25, 20, 10);
-        ctx.restore();
-
-        // Vida
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "white";
-        ctx.font = "20px Arial"
-        ctx.fillText(vida, x - camara.x, y - camara.y - r*2 - 10);
-
-        // Nombre
-        ctx.fillText(nombre, x - camara.x, y - camara.y - r*2 + 10);
-    })
-}
-
-function dibujarBalas(){
-    balas.forEach(({x, y, r, color}) => {
-        // Circulo
-        ctx.save();
-        ctx.beginPath();
-        ctx.fillStyle = color;
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 15;
-        ctx.arc(x - camara.x, y - camara.y, r, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.restore();
-    })
-}
-
-function estadoJuego(){
-    // Cuando ya se creó el jugador, ahora sí puede perder
-    // Esto es para evitar que salga el letrero de fin de juego al abrir la página
-    if(jugador) iniciado = true;
-
-    // Si el juego ya inició y nuestro jugador no existe, perdió la partida
-    if(iniciado && !jugador){
-        iniciado = false;
-        fin = true;
-
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = "30px Arial";
-        ctx.fillStyle = "white";
-        ctx.fillText("¡Perdiste!", canvas.width / 2, canvas.height / 2 - 35);
-        ctx.fillText(`Enemigos eliminados: ${puntaje}`, canvas.width / 2, canvas.height / 2);
-        ctx.fillText("Click para reiniciar", canvas.width / 2, canvas.height / 2 + 35);
-    }
-}
 
 function dibujarMapa(){
     // Fondo negro
@@ -138,6 +71,68 @@ function dibujarMapa(){
     ctx.restore();
 }
 
+function dibujarPoderes(){
+    poderes.forEach(({x, y, r, color}) => {
+        // Circulo
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        ctx.arc(x - camara.x, y - camara.y, r, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+    })
+}
+
+function dibujarBalas(){
+    balas.forEach(({x, y, r, color}) => {
+        // Circulo
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        ctx.arc(x - camara.x, y - camara.y, r, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+    })
+}
+
+function dibujarJugadores(){
+    // Se crea la lista de jugadores juntando al actual y a los enemigos
+    let listaJugadores = [...jugadores, ...bots];
+    // Si ya se creó el jugador actual, lo agrega
+    if(jugador) listaJugadores.push(jugador);
+
+    listaJugadores.forEach(({x, y, r, color, angulo, vida, nombre}) => {
+        ctx.save();
+        // Circulo
+        ctx.beginPath();
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = color;
+        ctx.arc(x - camara.x, y - camara.y, r, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Cañon
+        ctx.translate(x - camara.x, y - camara.y);
+        ctx.rotate((angulo + 90) * Math.PI / 180);
+        ctx.fillRect(-10, -25, 20, 10);
+        ctx.restore();
+
+        // Vida
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial"
+        ctx.fillText(vida, x - camara.x, y - camara.y - r*2 - 10);
+
+        // Nombre
+        ctx.fillText(nombre, x - camara.x, y - camara.y - r*2 + 10);
+    })
+}
+
 function dibujarPuntajes(){
     // Se actualiza el puntaje del jugador por si deja de existir, guardarlo y tener forma de mostrarlo
     if(jugador) puntaje = jugador.enemigosEliminados;
@@ -164,6 +159,26 @@ function dibujarPuntajes(){
     ctx.restore();
 }
 
+function estadoJuego(){
+    // Cuando ya se creó el jugador, ahora sí puede perder
+    // Esto es para evitar que salga el letrero de fin de juego al abrir la página
+    if(jugador) iniciado = true;
+
+    // Si el juego ya inició y nuestro jugador no existe, perdió la partida
+    if(iniciado && !jugador){
+        iniciado = false;
+        fin = true;
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "white";
+        ctx.fillText("¡Perdiste!", canvas.width / 2, canvas.height / 2 - 35);
+        ctx.fillText(`Enemigos eliminados: ${puntaje}`, canvas.width / 2, canvas.height / 2);
+        ctx.fillText("Click para reiniciar", canvas.width / 2, canvas.height / 2 + 35);
+    }
+}
+
 function reiniciar(){
     fin = false;
     // Aquí no se pone iniciado = true porque eso se hace hasta que se crea el jugador
@@ -183,6 +198,7 @@ function loop(){
         dibujarMapa();
     
         // Dibujar a todos los objetos
+        dibujarPoderes();
         dibujarBalas();
         dibujarJugadores();
 
@@ -270,6 +286,7 @@ function obtenerDatos(juego){
 
     balas = juego.balas;
     bots = juego.bots;
+    poderes = juego.poderes;
 }
 
 socket.on("datosJuego", obtenerDatos);

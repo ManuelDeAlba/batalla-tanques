@@ -16,6 +16,8 @@ const io = socketIO(servidor);
 
 const Mapa = require("./clases/Mapa");
 const Bot = require("./clases/Bot");
+const PoderMasVida = require("./clases/Poderes/PoderMasVida");
+const PoderMasDano = require("./clases/Poderes/PoderMasDano");
 
 const limiteBots = 10;
 
@@ -24,7 +26,8 @@ let juego = {
     mapa: new Mapa(),
     jugadores: [],
     bots: [],
-    balas: []
+    balas: [],
+    poderes: []
 }
 
 // Mueve a los jugadores y borra a los muertos
@@ -61,9 +64,25 @@ function actualizarBalas(){
     juego.balas = juego.balas.filter(bala => bala.estado);
 }
 
+// Comprueba las colisiones de los poderes y los borra si ya los agarraron
+function actualizarPoderes(){
+    juego.poderes.forEach(poder => poder.comprobarColisiones([...juego.jugadores, ...juego.bots]))
+    juego.poderes = juego.poderes.filter(poder => poder.estado);
+}
+
 function crearBot(){
     // Se le pasa el mapa para elegir un lugar aleatorio para aparecer
     if(juego.bots.length < limiteBots) juego.bots.push(new Bot(juego.mapa));
+}
+
+let iPoderes = 0;
+let tiempoPoderMasVida = 5 * 60; // 5 segundos
+let tiempoPoderMasDano = 5 * 60;
+function crearPoderes(){
+    iPoderes++;
+    // Crea el poder para tener más vida
+    if(iPoderes % tiempoPoderMasVida == 0) juego.poderes.push(new PoderMasVida(juego.mapa));
+    if(iPoderes % tiempoPoderMasDano == 0) juego.poderes.push(new PoderMasDano(juego.mapa));
 }
 
 function loop(){
@@ -71,9 +90,13 @@ function loop(){
     actualizarJugadores();
     actualizarBots();
     actualizarBalas();
+    actualizarPoderes();
 
     // Crear bots si hacen falta
     crearBot();
+
+    // Crear poderes cada cierto tiempo
+    crearPoderes();
 
     // Enviar los datos constantemente
     io.emit("datosJuego", juego);
