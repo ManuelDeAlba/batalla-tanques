@@ -47,7 +47,7 @@ function dibujarJugadores(){
         ctx.fillText(vida, x - camara.x, y - camara.y - r*2 - 10);
 
         // Nombre
-        ctx.fillText(nombre || "Anónimo", x - camara.x, y - camara.y - r*2 + 10);
+        ctx.fillText(nombre, x - camara.x, y - camara.y - r*2 + 10);
     })
 }
 
@@ -200,7 +200,7 @@ window.addEventListener('load', () => {
     camara = new Camara();
 
     // Pedir el nombre para el jugador
-    nombre = prompt("Escribe tu nombre:");
+    nombre = prompt("Escribe tu nombre:") || "Anónimo";
 
     // Pedir un nuevo jugador
     socket.emit("entrar", nombre);
