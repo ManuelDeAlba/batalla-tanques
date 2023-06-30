@@ -26,6 +26,7 @@ class Bot{
 
         this.masCercano = undefined;
         this.distanciaMaxima = 150;
+        this.direccionApuntado = Math.random() > 0.5 ? 1 : -1;
         this.autoApuntado = false;
 
         this.vida = 10;
@@ -52,8 +53,8 @@ class Bot{
             let anguloFinal = radToDeg(Math.atan2(this.y - this.masCercano.y, this.x - this.masCercano.x)) + 180;
 
             if(this.angulo % 360 != anguloFinal){
-                this.angulo += this.velAngulo;
-                if(Math.abs(this.angulo % 360 - anguloFinal) < this.velAngulo * 2){
+                this.angulo += this.velAngulo * this.direccionApuntado;
+                if(Math.abs(this.angulo - anguloFinal) % 360 < this.velAngulo){
                     this.angulo = anguloFinal;
                     // autoApuntado aunque se mueva el jugador
                     this.autoApuntado = true;
