@@ -30,15 +30,17 @@ class Bot extends Tanque{
         this.i++;
 
         // Aleatoriamente se selecciona la dirección de giro y para avanzar
-        if(this.i % this.tiempoAvanzar == 0) this.avanzar = enteroAleatorio(0, 1);
         if(this.i % this.tiempoGiro == 0) this.giro = enteroAleatorio(-1, 1);
+        if(this.i % this.tiempoAvanzar == 0){
+            // Si no está atacando, la probabilidad de caminar o no, es del 50%
+            if(!this.atacando) this.avanzar = enteroAleatorio(0, 1);
+            // Si está atacando, la probabilidad de caminar es solo de 20% para simular que está concentrado atacando
+            else this.avanzar = enteroAleatorio(1, 10) <= 8 ? 0 : 1;
+        }
 
         // Movimiento hacia adelante o quieto
-        // Si está atacando, no se mueve
-        if(!this.atacando){
-            this.x += Math.cos(degToRad(this.angulo)) * this.vel * this.avanzar;
-            this.y += Math.sin(degToRad(this.angulo)) * this.vel * this.avanzar;
-        }
+        this.x += Math.cos(degToRad(this.angulo)) * this.vel * this.avanzar;
+        this.y += Math.sin(degToRad(this.angulo)) * this.vel * this.avanzar;
 
         // Giros
         // Si está atacando, ignora el this.giro y voltea hacia el jugador automáticamente
@@ -70,7 +72,8 @@ class Bot extends Tanque{
     }
     comprobarDisparos(balas, jugadores){
         // Se obtiene la distancia del jugador más cercano (también guarda su posición en this.objetivo)
-        let distanciaObjetivo = this.obtenerJugadorMasCercano(jugadores);
+        let [objetivo, distanciaObjetivo] = this.obtenerObjetivoMasCercano(jugadores);
+        this.objetivo = objetivo;
 
         // Si ya tiene un objetivo y la distancia está dentro del rango
         if(this.objetivo && distanciaObjetivo < this.distanciaMaxima){
@@ -93,32 +96,8 @@ class Bot extends Tanque{
             this.atacando = false;
         }
     }
-    obtenerDireccionGiroOptima(anguloFinal){
-        let anguloIzquierda = this.angulo;
-        let anguloDerecha = this.angulo;
-
-        let direccion = 0;
-        while(!direccion){
-            // Con estas funciones se pasa al rango de [0 - 359] circularmente
-            anguloDerecha = convertirAGrados(anguloDerecha + this.velAngulo);
-            anguloIzquierda = convertirAGrados(anguloIzquierda - this.velAngulo);
-
-            // Si llegó primero por la derecha la dirección es 1
-            if(convertirAGrados(anguloDerecha - anguloFinal) < this.velAngulo){
-                direccion = 1;
-                break;
-            }
-
-            // Si llegó primero por la derecha la dirección es -1
-            if(convertirAGrados(anguloIzquierda - anguloFinal) < this.velAngulo){
-                direccion = -1;
-                break;
-            }
-        }
-
-        return direccion;
-    }
-    obtenerJugadorMasCercano(jugadores){
+    obtenerObjetivoMasCercano(jugadores){
+        let objetivo;
         let distanciaObjetivo = undefined;
 
         // Comprueba la distancia con todos los jugadores y obtiene al más cercano
@@ -128,11 +107,12 @@ class Bot extends Tanque{
 
             let distancia = Math.sqrt((this.x - jugador.x) ** 2 + (this.y - jugador.y) ** 2);
 
-            // Si la distancia es menor, se guardan sus datos para después calcular el ángulo y girarse
+            // Si la distancia es menor con ese nuevo objetivo,
+            // se guardan sus datos para después calcular el ángulo y girarse
             if(distancia < distanciaObjetivo || distanciaObjetivo == undefined){
                 distanciaObjetivo = distancia;
 
-                this.objetivo = {
+                objetivo = {
                     id: jugador.id,
                     x: jugador.x,
                     y: jugador.y
@@ -140,7 +120,10 @@ class Bot extends Tanque{
             }
         })
 
-        return distanciaObjetivo;
+        return [
+            objetivo,
+            distanciaObjetivo
+        ];
     }
 }
 

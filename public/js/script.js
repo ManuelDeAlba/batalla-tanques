@@ -245,7 +245,6 @@ window.addEventListener('keydown', e => {
         socket.emit("disparar", true);
     }
 })
-
 window.addEventListener('keyup', e => {
     // Evitar que se sigan enviando datos si ya perdió el jugador
     if(fin) return;
@@ -265,6 +264,21 @@ window.addEventListener('keyup', e => {
     if(e.code == "Space"){
         socket.emit("disparar", false);
     }
+})
+
+window.addEventListener('mousemove', e => {
+    if(!iniciado) return;
+
+    let x = e.clientX - canvas.getBoundingClientRect().left + camara.x;
+    let y = e.clientY - canvas.getBoundingClientRect().top + camara.y;
+    
+    socket.emit("apuntar", {x, y});
+})
+window.addEventListener("mousedown", e => {
+    socket.emit("disparar", true);
+})
+window.addEventListener("mouseup", e => {
+    socket.emit("disparar", false);
 })
 
 canvas.addEventListener('click', e => {

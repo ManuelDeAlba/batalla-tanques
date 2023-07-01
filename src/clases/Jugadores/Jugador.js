@@ -1,4 +1,4 @@
-const { degToRad, enteroAleatorio } = require("../../utils");
+const { degToRad, enteroAleatorio, radToDeg, convertirAGrados } = require("../../utils");
 const Tanque = require("./Tanque");
 const Bala = require("./Bala");
 
@@ -14,6 +14,8 @@ class Jugador extends Tanque{
 
         this.color = `hsl(${enteroAleatorio(0, 360)}, 100%, 50%)`;
 
+        this.apuntando = false;
+        this.anguloApuntar;
         this.teclas = {
             iz: false,
             de: false,
@@ -26,8 +28,26 @@ class Jugador extends Tanque{
     }
     mover(mapa){
         // Giros
-        if(this.teclas.iz) this.angulo -= this.velAngulo;
-        if(this.teclas.de) this.angulo += this.velAngulo;
+        // Si está apuntando con el ratón, se desactivan las teclas de giro
+        if(this.apuntando == true){
+            // Primero revisamos hacia donde va a girar para que sea más rápido
+            let direccion = this.obtenerDireccionGiroOptima(this.anguloApuntar);
+
+            // Aquí ya aplica los movimientos reales sabiendo la dirección a la que tiene que girar para que sea más óptimo
+            if(convertirAGrados(this.angulo) != this.anguloApuntar){
+                // Se mueve hacia el lado que se calculó
+                this.angulo += this.velAngulo * direccion;
+
+                // Si ya está lo suficientemente cerca, se acomoda el ángulo que haga falta para que no se pase
+                if(convertirAGrados(this.angulo - this.anguloApuntar) < this.velAngulo){
+                    this.angulo = this.anguloApuntar;
+                    this.apuntando = false;
+                }
+            }
+        } else {
+            if(this.teclas.iz) this.angulo -= this.velAngulo;
+            if(this.teclas.de) this.angulo += this.velAngulo;
+        }
         
         // Movimiento hacia adelante o atrás
         if(this.teclas.ad){
@@ -61,6 +81,10 @@ class Jugador extends Tanque{
                 color: this.color
             }));
         }
+    }
+    apuntar(coordenadas){
+        this.apuntando = true;
+        this.anguloApuntar = Math.round(radToDeg(Math.atan2(coordenadas.y - this.y, coordenadas.x - this.x)));
     }
 }
 

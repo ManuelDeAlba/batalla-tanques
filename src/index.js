@@ -128,6 +128,14 @@ function moverJugador(socket, movimiento){
     jugador.actualizarTecla(movimiento);
 }
 
+function apuntarJugador(socket, coordenadas){
+    // Si no existe el jugador, no se mueve (esto evita que se mueva exactamente en el momento que muere)
+    let jugador = juego.jugadores.find(jugador => jugador.id == socket.id);
+    if(!jugador) return;
+
+    jugador.apuntar(coordenadas);
+}
+
 function disparar(socket, disparo){
     // Si no existe el jugador, no hace nada (esto evita que se manden disparos exactamente en el momento que muere)
     let jugador = juego.jugadores.find(jugador => jugador.id == socket.id);
@@ -147,6 +155,9 @@ io.on('connection', (socket) => {
 
     // Movimiento de los jugadores, recibe el movimiento y lo aplica
     socket.on("mover", movimiento => moverJugador(socket, movimiento));
+
+    // Giro del jugador con el ratón
+    socket.on("apuntar", coordenadas => apuntarJugador(socket, coordenadas));
 
     // Disparo de jugadores, recibe si se presionó o se soltó la tecla
     socket.on("disparar", disparo => disparar(socket, disparo));
