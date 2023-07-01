@@ -1,6 +1,6 @@
 const { v1: uuidv1 } = require("uuid");
 
-const { degToRad, radToDeg, enteroAleatorio } = require("../../utils");
+const { degToRad, radToDeg, enteroAleatorio, convertirAGrados } = require("../../utils");
 const Tanque = require("./Tanque");
 const Bala = require("./Bala");
 
@@ -24,7 +24,6 @@ class Bot extends Tanque{
         this.objetivo = undefined;
         this.distanciaMaxima = 200;
         this.direccionApuntado = enteroAleatorio(0, 1) == 1 ? 1 : -1;
-        this.autoApuntado = false;
     }
     mover(mapa){
         // Contador para las acciones del bot
@@ -46,22 +45,20 @@ class Bot extends Tanque{
         if(this.atacando){
             let anguloFinal = radToDeg(Math.atan2(this.y - this.objetivo.y, this.x - this.objetivo.x)) + 180;
 
-            if(this.angulo % 360 != anguloFinal){
-                this.angulo += this.velAngulo * this.direccionApuntado;
-                if(Math.abs(this.angulo - anguloFinal) % 360 < this.velAngulo){
+            // Primero revisamos hacia donde va a girar para que sea más rápido
+            let direccion = this.obtenerDireccionGiroOptima(anguloFinal);
+
+            // Aquí ya aplica los movimientos reales sabiendo la dirección a la que tiene que girar para que sea más óptimo
+            if(convertirAGrados(this.angulo) != anguloFinal){
+                // Se mueve hacia el lado que se calculó
+                this.angulo += this.velAngulo * direccion;
+
+                // Si ya está lo suficientemente cerca, se acomoda el ángulo que haga falta para que no se pase
+                if(convertirAGrados(this.angulo - anguloFinal) < this.velAngulo){
                     this.angulo = anguloFinal;
-                    // autoApuntado aunque se mueva el jugador
-                    this.autoApuntado = true;
                 }
             }
-
-            // Si alguna vez ya apuntó bien al jugador, entonces no va a dejar de mirarlo
-            // Esto evita que el jugador se mueva y el bot tenga que volver a buscarlo
-            if(this.autoApuntado){
-                this.angulo = anguloFinal;
-            }
         } else {
-            this.autoApuntado = false;
             this.angulo += this.velAngulo * this.giro;
         }
 
@@ -70,33 +67,6 @@ class Bot extends Tanque{
         if(this.x + this.r > mapa.x + mapa.w) this.x = mapa.x + mapa.w - this.r;
         if(this.y - this.r < mapa.y) this.y = mapa.y + this.r;
         if(this.y + this.r > mapa.y + mapa.h) this.y = mapa.y + mapa.h - this.r;
-    }
-    obtenerJugadorMasCercano(jugadores){
-        let distanciaObjetivo = undefined;
-
-        // Comprueba la distancia con todos los jugadores y obtiene al más cercano
-        jugadores.forEach(jugador => {
-            // Si es el mismo bot, entonces se salta
-            if(jugador.id == this.id) return;
-
-            let distancia = Math.sqrt((this.x - jugador.x) ** 2 + (this.y - jugador.y) ** 2);
-
-            // Si la distancia es menor, se guardan sus datos para después calcular el ángulo y girarse
-            if(distancia < distanciaObjetivo || distanciaObjetivo == undefined){
-                distanciaObjetivo = distancia;
-
-                // Si acaba de cambiar su target, lo tiene que buscar y no auto apuntar
-                if(this.objetivo?.id != jugador.id) this.autoApuntado = false;
-
-                this.objetivo = {
-                    id: jugador.id,
-                    x: jugador.x,
-                    y: jugador.y
-                };
-            }
-        })
-
-        return distanciaObjetivo;
     }
     comprobarDisparos(balas, jugadores){
         // Se obtiene la distancia del jugador más cercano (también guarda su posición en this.objetivo)
@@ -122,6 +92,55 @@ class Bot extends Tanque{
         } else {
             this.atacando = false;
         }
+    }
+    obtenerDireccionGiroOptima(anguloFinal){
+        let anguloIzquierda = this.angulo;
+        let anguloDerecha = this.angulo;
+
+        let direccion = 0;
+        while(!direccion){
+            // Con estas funciones se pasa al rango de [0 - 359] circularmente
+            anguloDerecha = convertirAGrados(anguloDerecha + this.velAngulo);
+            anguloIzquierda = convertirAGrados(anguloIzquierda - this.velAngulo);
+
+            // Si llegó primero por la derecha la dirección es 1
+            if(convertirAGrados(anguloDerecha - anguloFinal) < this.velAngulo){
+                direccion = 1;
+                break;
+            }
+
+            // Si llegó primero por la derecha la dirección es -1
+            if(convertirAGrados(anguloIzquierda - anguloFinal) < this.velAngulo){
+                direccion = -1;
+                break;
+            }
+        }
+
+        return direccion;
+    }
+    obtenerJugadorMasCercano(jugadores){
+        let distanciaObjetivo = undefined;
+
+        // Comprueba la distancia con todos los jugadores y obtiene al más cercano
+        jugadores.forEach(jugador => {
+            // Si es el mismo bot, entonces se salta
+            if(jugador.id == this.id) return;
+
+            let distancia = Math.sqrt((this.x - jugador.x) ** 2 + (this.y - jugador.y) ** 2);
+
+            // Si la distancia es menor, se guardan sus datos para después calcular el ángulo y girarse
+            if(distancia < distanciaObjetivo || distanciaObjetivo == undefined){
+                distanciaObjetivo = distancia;
+
+                this.objetivo = {
+                    id: jugador.id,
+                    x: jugador.x,
+                    y: jugador.y
+                };
+            }
+        })
+
+        return distanciaObjetivo;
     }
 }
 

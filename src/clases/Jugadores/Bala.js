@@ -1,5 +1,12 @@
 class Bala{
-    constructor({id_jugador, x, y, dano=1, angulo, color="gray"}){
+    constructor({
+        id_jugador,
+        x,
+        y,
+        dano = 1,
+        angulo,
+        color = "gray"
+    }){
         this.id_jugador = id_jugador;
         this.x = x;
         this.y = y;

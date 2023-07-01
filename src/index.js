@@ -108,7 +108,11 @@ let intervalo = setInterval(loop, 1000/60);
 //? Funciones de eventos de socketio
 function crearJugador(socket, nombre){
     // Se le pasan los datos para crear y el mapa para aparecer en un lugar aleatorio
-    juego.jugadores.push(new Jugador(socket.id, nombre, juego.mapa));
+    juego.jugadores.push(new Jugador({
+        id: socket.id,
+        nombre,
+        mapa: juego.mapa
+    }));
 }
 
 function borrarJugador(socket){

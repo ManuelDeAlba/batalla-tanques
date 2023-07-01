@@ -3,7 +3,11 @@ const Tanque = require("./Tanque");
 const Bala = require("./Bala");
 
 class Jugador extends Tanque{
-    constructor(id, nombre, mapa){
+    constructor({
+        id,
+        nombre,
+        mapa
+    }){
         super(mapa);
         this.id = id;
         this.nombre = nombre;
