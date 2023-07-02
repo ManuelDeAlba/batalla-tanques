@@ -85,6 +85,17 @@ function crearPoderes(){
     if(iPoderes % tiempoPoderMasDano == 0) juego.poderes.push(new PoderMasDano(juego.mapa));
 }
 
+function enviarDatosJuego(){
+    // Solo mandamos los datos de renderizado para evitar problemas al enviar cierto tipo de datos con socket.io
+    io.emit("datosJuego", {
+        mapa: juego.mapa,
+        jugadores: juego.jugadores.map(jugador => jugador.obtenerDatosFrontend()),
+        bots: juego.bots.map(bot => bot.obtenerDatosFrontend()),
+        balas: juego.balas.map(bala => bala.obtenerDatosFrontend()),
+        poderes: juego.poderes.map(poder => poder.obtenerDatosFrontend())
+    });
+}
+
 function loop(){
     // Mover objetos
     actualizarJugadores();
@@ -99,7 +110,7 @@ function loop(){
     crearPoderes();
 
     // Enviar los datos constantemente
-    io.emit("datosJuego", juego);
+    enviarDatosJuego();
 }
 
 // Intervalo del juego

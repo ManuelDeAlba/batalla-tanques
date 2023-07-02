@@ -6,11 +6,12 @@ const Bala = require("./Bala");
 
 class Bot extends Tanque{
     constructor(mapa){
-        super(mapa);
-        this.id = uuidv1();
-        this.nombre = "Bot";
-        
-        this.color = "red";
+        super({
+            mapa,
+            id: uuidv1(),
+            nombre: "Bot",
+            color: "red"
+        });
 
         // Propiedades que solo tienen los bots
         this.atacando = false;

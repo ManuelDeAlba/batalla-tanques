@@ -23,6 +23,14 @@ class Poder{
             }
         })
     }
+    obtenerDatosFrontend(){
+        return {
+            x: this.x,
+            y: this.y,
+            r: this.r,
+            color: this.color
+        }
+    }
 }
 
 module.exports = Poder;

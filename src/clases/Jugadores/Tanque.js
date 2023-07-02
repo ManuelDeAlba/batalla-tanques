@@ -1,7 +1,16 @@
 const { enteroAleatorio, convertirAGrados } = require("../../utils");
 
 class Tanque{
-    constructor(mapa){
+    constructor({
+        mapa,
+        id,
+        nombre,
+        color
+    }){
+        this.id = id;
+        this.nombre = nombre;
+        this.color = color;
+
         this.r = 20;
         this.x = enteroAleatorio(mapa.x + this.r, mapa.x + mapa.w - this.r);
         this.y = enteroAleatorio(mapa.y + this.r, mapa.y + mapa.h - this.r);
@@ -38,6 +47,19 @@ class Tanque{
         }
 
         return direccion;
+    }
+    obtenerDatosFrontend(){
+        return {
+            id: this.id,
+            nombre: this.nombre,
+            color: this.color,
+            x: this.x,
+            y: this.y,
+            r: this.r,
+            angulo: this.angulo,
+            vida: this.vida,
+            enemigosEliminados: this.enemigosEliminados
+        }
     }
 }
 

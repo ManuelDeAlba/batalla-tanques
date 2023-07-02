@@ -8,11 +8,12 @@ class Jugador extends Tanque{
         nombre,
         mapa
     }){
-        super(mapa);
-        this.id = id;
-        this.nombre = nombre;
-
-        this.color = `hsl(${enteroAleatorio(0, 360)}, 100%, 50%)`;
+        super({
+            mapa,
+            id,
+            nombre,
+            color: `hsl(${enteroAleatorio(0, 360)}, 100%, 50%)`
+        });
 
         this.apuntando = false;
         this.anguloApuntar;
