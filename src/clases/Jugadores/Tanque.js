@@ -22,6 +22,8 @@ class Tanque{
         this.dano = 1;
         this.danoOriginal = this.dano; // Para regresar su daño después de un poder
         this.enemigosEliminados = 0;
+
+        this.poderesActivos = [];
     }
     obtenerDireccionGiroOptima(anguloFinal){
         let anguloIzquierda = this.angulo;
