@@ -27,6 +27,7 @@ let juego = {
     jugadores: [],
     bots: [],
     balas: [],
+    explosiones: [],
     poderes: []
 }
 
@@ -57,7 +58,8 @@ function actualizarBalas(){
     // Mueve la bala y busca si hay colisiones
     juego.balas.forEach(bala => {
         bala.mover(juego.mapa)
-        bala.comprobarColisiones([...juego.jugadores, ...juego.bots]);
+        bala.comprobarColisionesJugadores([...juego.jugadores, ...juego.bots], juego.explosiones);
+        bala.comprobarColisionesBalas(juego.balas, juego.explosiones);
     });
 
     // Detecta las colisiones
@@ -68,6 +70,11 @@ function actualizarBalas(){
 function actualizarPoderes(){
     juego.poderes.forEach(poder => poder.comprobarColisiones([...juego.jugadores, ...juego.bots]))
     juego.poderes = juego.poderes.filter(poder => poder.estado);
+}
+
+function actualizarExplosiones(){
+    juego.explosiones.forEach(explosion => explosion.mover());
+    juego.explosiones = juego.explosiones.filter(explosion => explosion.estado);
 }
 
 function crearBot(){
@@ -92,6 +99,7 @@ function enviarDatosJuego(){
         jugadores: juego.jugadores.map(jugador => jugador.obtenerDatosFrontend()),
         bots: juego.bots.map(bot => bot.obtenerDatosFrontend()),
         balas: juego.balas.map(bala => bala.obtenerDatosFrontend()),
+        explosiones: juego.explosiones.map(explosion => explosion.obtenerDatosFrontend()),
         poderes: juego.poderes.map(poder => poder.obtenerDatosFrontend())
     });
 }
@@ -102,6 +110,7 @@ function loop(){
     actualizarBots();
     actualizarBalas();
     actualizarPoderes();
+    actualizarExplosiones();
 
     // Crear bots si hacen falta
     crearBot();

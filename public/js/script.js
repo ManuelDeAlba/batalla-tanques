@@ -12,6 +12,7 @@ let puntaje = 0;
 let jugador;
 let jugadores = [];
 let balas = [];
+let explosiones = [];
 let bots = [];
 let poderes = [];
 let mapa;
@@ -133,6 +134,15 @@ function dibujarJugadores(){
     })
 }
 
+function dibujarExplosiones(){
+    explosiones.forEach(({x, y, r, color}) => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x - camara.x, y - camara.y, r, 0, 2 * Math.PI);
+        ctx.fill();
+    })
+}
+
 function dibujarPuntajes(){
     // Se actualiza el puntaje del jugador por si deja de existir, guardarlo y tener forma de mostrarlo
     if(jugador) puntaje = jugador.enemigosEliminados;
@@ -201,6 +211,7 @@ function loop(){
         dibujarPoderes();
         dibujarBalas();
         dibujarJugadores();
+        dibujarExplosiones();
 
         // Dibuja el puntaje del jugador
         dibujarPuntajes();
@@ -299,6 +310,7 @@ function obtenerDatos(juego){
     })
 
     balas = juego.balas;
+    explosiones = juego.explosiones;
     bots = juego.bots;
     poderes = juego.poderes;
 }
