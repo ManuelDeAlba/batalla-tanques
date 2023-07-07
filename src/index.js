@@ -84,7 +84,7 @@ function crearBot(){
 
 let iPoderes = 0;
 let tiempoPoderMasVida = 5 * 60; // 5 segundos
-let tiempoPoderMasDano = 5 * 60;
+let tiempoPoderMasDano = 10 * 60; // 10 segundos
 function crearPoderes(){
     iPoderes++;
     // Crea el poder para tener más vida
