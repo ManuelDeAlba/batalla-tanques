@@ -44,6 +44,8 @@ class Jugador extends Tanque{
                     this.angulo = this.anguloApuntar;
                     this.apuntando = false;
                 }
+            } else {
+                this.apuntando = false;
             }
         } else {
             if(this.teclas.iz) this.angulo -= this.velAngulo;
