@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <div class="modal">
+        <form class="modal__contenedor" id="formNombre">
+            <h1 class="titulo">Escribe tu nombre:</h1>
+            <input type="text" name="nombre" id="inpNombre">
+            <button type="submit">Aceptar</button>
+        </form>
+    </div>
+    
     <canvas id="canvas" width="600" height="600" style="border: 1px solid #000;"></canvas>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/Camara.js"></script>

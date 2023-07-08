@@ -1,3 +1,7 @@
+const modal = document.querySelector(".modal");
+const formNombre = document.getElementById("formNombre");
+const inpNombre = document.getElementById("inpNombre");
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -224,14 +228,23 @@ function loop(){
 }
 
 window.addEventListener('load', () => {
-    camara = new Camara();
+    camara = new Camara(); 
 
-    // Pedir el nombre para el jugador
-    nombre = prompt("Escribe tu nombre:") || "Anónimo";
+    inpNombre.focus();
+})
+
+// Iniciar juego al poner el nombre
+formNombre.addEventListener('submit', e => {
+    e.preventDefault();
+
+    modal.classList.add("oculta");
+
+    nombre = inpNombre.value.trim();
 
     // Pedir un nuevo jugador
     socket.emit("entrar", nombre);
-    
+
+    // Empieza el juego
     loop();
 })
 
