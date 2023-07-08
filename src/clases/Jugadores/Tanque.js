@@ -50,6 +50,19 @@ class Tanque{
 
         return direccion;
     }
+    recibirDano({ dano, creador }){
+        this.vida -= dano;
+        // Reinicia el temporizador para curarse (solo si es jugador, los bots no se curan)
+        if(this.iTiempoRegenerar) this.iTiempoRegenerar = 0;
+        
+        // Si ya se murió el jugador
+        if(this.vida <= 0){
+            this.vida = 0;
+
+            // Le suma un enemigo eliminado al dueño de la bala
+            if(creador) creador.enemigosEliminados++;
+        }
+    }
     obtenerDatosFrontend(){
         return {
             id: this.id,

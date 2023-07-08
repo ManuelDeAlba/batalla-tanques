@@ -19,6 +19,7 @@ class Bala{
         this.dano = dano;
 
         this.estado = 1;
+        this.particulasExplosion = 3;
     }
     mover(mapa){
         // Se mueve la bala
@@ -40,25 +41,16 @@ class Bala{
                 let angulo = Math.atan2(jugador.y - this.y, jugador.x - this.x);
 
                 // Se crea la explosión
-                for(let i = 0; i < 3; i++){
-                    explosiones.push(new Explosion({
-                        x: this.x + (Math.cos(angulo) * this.r) + -7+Math.random()*14,
-                        y: this.y + (Math.sin(angulo) * this.r) + -7+Math.random()*14,
-                        r: this.r
-                    }));
-                }
+                this.crearExplosion({
+                    angulo,
+                    explosiones
+                });
 
-                // Al jugador se le baja la vida por el disparo
-                jugador.vida -= this.dano;
-                
-                // Si ya se murió el jugador
-                if(jugador.vida <= 0){
-                    jugador.vida = 0;
-
-                    // Le suma un enemigo eliminado al dueño de la bala
-                    let creador = jugadores.find(jugador => jugador.id == this.id_jugador);
-                    if(creador) creador.enemigosEliminados++;
-                }
+                // Al jugador se le baja la vida por el disparo, el creador es para sumarle puntos por muerte
+                jugador.recibirDano({
+                    dano: this.dano,
+                    creador: jugadores.find(jugador => jugador.id == this.id_jugador)
+                })
 
                 // Desaparece la bala
                 this.estado = 0;
@@ -77,13 +69,10 @@ class Bala{
 
                 // Se crea la explosión para dibujar solamente cuando la primera bala detecta la colisión
                 if(this.estado){
-                    for(let i = 0; i < 3; i++){
-                        explosiones.push(new Explosion({
-                            x: this.x + (Math.cos(angulo) * this.r) + -7+Math.random()*14,
-                            y: this.y + (Math.sin(angulo) * this.r) + -7+Math.random()*14,
-                            r: this.r
-                        }));
-                    }
+                    this.crearExplosion({
+                        angulo,
+                        explosiones
+                    });
                 }
 
                 // Desaparecen las balas
@@ -91,6 +80,15 @@ class Bala{
                 bala.estado = 0;
             }
         })
+    }
+    crearExplosion({angulo, explosiones}){
+        for(let i = 0; i < this.particulasExplosion; i++){
+            explosiones.push(new Explosion({
+                x: this.x + (Math.cos(angulo) * this.r) + -7+Math.random()*14,
+                y: this.y + (Math.sin(angulo) * this.r) + -7+Math.random()*14,
+                r: this.r
+            }));
+        }
     }
     obtenerDatosFrontend(){
         return {

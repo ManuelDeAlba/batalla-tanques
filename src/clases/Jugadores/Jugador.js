@@ -15,6 +15,10 @@ class Jugador extends Tanque{
             color: `hsl(${enteroAleatorio(0, 360)}, 100%, 50%)`
         });
 
+        this.vidaMax = this.vida;
+        this.iTiempoRegenerar = 0;
+        this.tiempoRegenerar = 5 * 60; // 5 segundos
+
         this.apuntando = false;
         this.anguloApuntar;
         this.teclas = {
@@ -67,6 +71,14 @@ class Jugador extends Tanque{
         if(this.x + this.r > mapa.x + mapa.w) this.x = mapa.x + mapa.w - this.r;
         if(this.y - this.r < mapa.y) this.y = mapa.y + this.r;
         if(this.y + this.r > mapa.y + mapa.h) this.y = mapa.y + mapa.h - this.r;
+
+        this.regenerarVida();
+    }
+    regenerarVida(){
+        this.iTiempoRegenerar++;
+        if(this.iTiempoRegenerar % this.tiempoRegenerar == 0){
+            if(this.vida < this.vidaMax) this.vida++;
+        }
     }
     disparar(balas){
         // Crea una bala solo si acaba de presionar el boton (evita que salgan muchas si deja apretada la tecla)
